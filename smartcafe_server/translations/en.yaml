@@ -1,0 +1,21 @@
+configuration:
+  ha_base_url:
+    name: HA Base URL
+    description: >-
+      Home Assistant base URL (e.g., http://homeassistant.local:8123)
+  ha_username:
+    name: HA Username
+    description: >-
+      Home Assistant username for authentication
+  ha_password:
+    name: HA Password
+    description: >-
+      Home Assistant password for authentication
+  token_refresh_time:
+    name: Token Refresh Time
+    description: >-
+      Daily token refresh time in HH:MM format (e.g., 03:30). Leave empty to disable.
+  port:
+    name: Port
+    description: >-
+      Server listening port (default: 8765)

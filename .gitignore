@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+dist/
+build/
+*.egg-info/
+*.spec
+
+# Environment
+.env
+.env.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Data (local development)
+smartcafe_server/smartcafe_server/server/data/
+
+# ---------------------------------------------------------------------------
+# 本机生成的大文件（加起来 900MB+，绝对不要传进 GitHub）
+#   部署输出\  629MB  —— 四个店的部署包，是「一键生成部署文件.bat」跑出来的产物
+#   dist\      252MB  —— PyInstaller 打包出来的 exe + 依赖
+#   build\      23MB  —— 打包中间产物
+# 这些都能重新生成，仓库里只留源码。
+# ---------------------------------------------------------------------------
+部署输出/
+_tmp_backup/

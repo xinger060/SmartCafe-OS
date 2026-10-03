@@ -1,0 +1,21 @@
+configuration:
+  ha_base_url:
+    name: HA 地址
+    description: >-
+      Home Assistant 地址（例如：http://homeassistant.local:8123）
+  ha_username:
+    name: HA 用户名
+    description: >-
+      Home Assistant 登录用户名
+  ha_password:
+    name: HA 密码
+    description: >-
+      Home Assistant 登录密码
+  token_refresh_time:
+    name: Token 刷新时间
+    description: >-
+      每日定时刷新Token的时间，格式 HH:MM（例如：03:30）。留空禁用。
+  port:
+    name: 端口
+    description: >-
+      服务端口（默认：8765）

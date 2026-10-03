@@ -1,0 +1,1659 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HA助手 - 管理面板</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
+    body {
+      font-family: 'Inter', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+      background: #0A0B0F;
+      color: #E8E8EF;
+      font-size: 16px;
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    input, select, textarea, button {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      font-family: inherit;
+    }
+
+    :root {
+      --bg-base: #0A0B0F;
+      --bg-surface: #12131A;
+      --bg-elevated: #1A1B24;
+      --bg-hover: #22232E;
+      --bg-active: #2A2B38;
+      --accent-primary: #6C5CE7;
+      --accent-secondary: #00D2FF;
+      --text-primary: #E8E8EF;
+      --text-secondary: #8B8CA0;
+      --text-tertiary: #4A4B5E;
+      --text-glow: #00D2FF;
+      --semantic-error: #FF6B6B;
+      --semantic-success: #00E6A0;
+      --semantic-warning: #FFA502;
+      --semantic-info: #48DBFB;
+      --border-subtle: rgba(255, 255, 255, 0.06);
+      --border-default: rgba(108, 92, 231, 0.15);
+      --border-hover: rgba(108, 92, 231, 0.35);
+      --border-active: rgba(108, 92, 231, 0.50);
+      --gradient-primary: linear-gradient(135deg, #6C5CE7, #00D2FF);
+      --shadow-glow: 0 0 20px rgba(108, 92, 231, 0.15), 0 8px 32px rgba(0, 0, 0, 0.3);
+      --shadow-glow-cyan: 0 0 20px rgba(0, 210, 255, 0.15), 0 8px 32px rgba(0, 0, 0, 0.3);
+      --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --radius-sm: 6px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+      --radius-full: 9999px;
+    }
+
+    .bg-aurora {
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 20% 50%, rgba(108, 92, 231, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(0, 210, 255, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 80%, rgba(255, 107, 107, 0.03) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(108, 92, 231, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(108, 92, 231, 0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .header {
+      background: rgba(10, 11, 15, 0.85);
+      backdrop-filter: blur(20px) saturate(1.2);
+      -webkit-backdrop-filter: blur(20px) saturate(1.2);
+      border-bottom: 1px solid var(--border-subtle);
+      height: 64px;
+      padding: 0 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+    }
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .header-logo-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--gradient-primary);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      color: white;
+    }
+    .header h1 {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .header-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    .header-status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--semantic-success);
+      box-shadow: 0 0 8px var(--semantic-success);
+    }
+
+    .layout {
+      margin-top: 64px;
+      min-height: calc(100vh - 64px);
+      position: relative;
+      z-index: 1;
+    }
+
+    .main-content {
+      padding: 32px 48px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .page-header {
+      margin-bottom: 32px;
+    }
+    .page-header h2 {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+    .page-header p {
+      font-size: 15px;
+      color: var(--text-secondary);
+    }
+
+    .card {
+      background: rgba(18, 19, 26, 0.70);
+      backdrop-filter: blur(20px) saturate(1.2);
+      -webkit-backdrop-filter: blur(20px) saturate(1.2);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-lg);
+      margin-bottom: 24px;
+      overflow: hidden;
+      position: relative;
+      transition: all 0.3s var(--ease-default);
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(108, 92, 231, 0.5), rgba(0, 210, 255, 0.5), transparent);
+    }
+    .card-header {
+      padding: 20px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .card-header h3 {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+    }
+    .card-body { padding: 24px; }
+
+    .form-group { margin-bottom: 20px; }
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      letter-spacing: 0.01em;
+    }
+    .form-group input[type="text"],
+    .form-group input[type="password"],
+    .form-group input[type="number"],
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid rgba(108, 92, 231, 0.20);
+      border-radius: var(--radius-md);
+      font-size: 15px;
+      color: var(--text-primary);
+      background: rgba(10, 11, 15, 0.80);
+      transition: all 0.3s var(--ease-default);
+    }
+    .form-group input::placeholder,
+    .form-group textarea::placeholder {
+      color: var(--text-tertiary);
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.15), 0 0 15px rgba(108, 92, 231, 0.10);
+    }
+    .form-group select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238B8CA0' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+      padding-right: 40px;
+      cursor: pointer;
+    }
+    .form-group textarea {
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 13px;
+      resize: vertical;
+    }
+
+    .btn {
+      padding: 10px 24px;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.3s var(--ease-default);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      position: relative;
+      overflow: hidden;
+      user-select: none;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary {
+      background: linear-gradient(135deg, #6C5CE7, #00D2FF);
+      color: #FFFFFF;
+    }
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, #7C6DF7, #10E2FF);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .btn-primary:hover::before { opacity: 1; }
+    .btn-primary:hover {
+      box-shadow: 0 0 20px rgba(108, 92, 231, 0.4), 0 0 40px rgba(0, 210, 255, 0.2);
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      background: rgba(108, 92, 231, 0.15);
+      color: #6C5CE7;
+      border: 1px solid rgba(108, 92, 231, 0.3);
+    }
+    .btn-secondary:hover {
+      background: rgba(108, 92, 231, 0.25);
+      border-color: rgba(108, 92, 231, 0.5);
+      box-shadow: 0 0 15px rgba(108, 92, 231, 0.2);
+    }
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+    }
+    .btn-ghost:hover {
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.05);
+      border-color: var(--border-default);
+    }
+    .btn-danger {
+      background: rgba(255, 107, 107, 0.15);
+      color: #FF6B6B;
+      border: 1px solid rgba(255, 107, 107, 0.3);
+    }
+    .btn-danger:hover {
+      background: rgba(255, 107, 107, 0.25);
+      border-color: rgba(255, 107, 107, 0.5);
+      box-shadow: 0 0 15px rgba(255, 107, 107, 0.2);
+    }
+    .btn-sm {
+      padding: 7px 14px;
+      font-size: 13px;
+    }
+    .btn-group { display: inline-flex; gap: 8px; align-items: center; }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      table-layout: fixed;
+    }
+    th, td {
+      padding: 14px 16px;
+      text-align: left;
+      font-size: 14px;
+    }
+    th {
+      font-weight: 500;
+      color: var(--text-secondary);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      background: rgba(108, 92, 231, 0.04);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    th:first-child { border-radius: var(--radius-md) 0 0 0; }
+    th:last-child { border-radius: 0 var(--radius-md) 0 0; }
+    td {
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+    }
+    tr:last-child td { border-bottom: none; }
+    tr {
+      transition: background 0.15s ease;
+    }
+    tr:hover td { background: rgba(108, 92, 231, 0.04); }
+
+    .preview-link {
+      color: var(--accent-primary);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+    .preview-link:hover {
+      color: #7C6DF7;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 11, 15, 0.80);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.2s ease;
+    }
+    .modal.active {
+      display: flex;
+    }
+    .modal-content {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-xl);
+      width: 520px;
+      max-width: 90%;
+      padding: 32px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+      animation: scaleIn 0.3s var(--ease-spring);
+      position: relative;
+    }
+    .modal-content::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--gradient-primary);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+    .modal-header h2 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+    }
+    .modal-close {
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      font-size: 18px;
+      cursor: pointer;
+      color: var(--text-secondary);
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-md);
+      transition: all 0.2s ease;
+    }
+    .modal-close:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+      border-color: var(--border-default);
+    }
+
+    .format-hint {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 8px;
+    }
+
+    .login-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: var(--bg-base);
+      position: relative;
+    }
+    .login-card {
+      width: 400px;
+      background: rgba(18, 19, 26, 0.80);
+      backdrop-filter: blur(20px) saturate(1.2);
+      -webkit-backdrop-filter: blur(20px) saturate(1.2);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-xl);
+      padding: 48px;
+      position: relative;
+      overflow: hidden;
+    }
+    .login-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--gradient-primary);
+    }
+    .login-card h2 {
+      text-align: center;
+      margin-bottom: 32px;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .login-error {
+      color: var(--semantic-error);
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: none;
+      text-align: center;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+    .status-badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .status-success {
+      background: rgba(0, 230, 160, 0.1);
+      color: #00E6A0;
+      border: 1px solid rgba(0, 230, 160, 0.2);
+    }
+    .status-success::before {
+      background: #00E6A0;
+      box-shadow: 0 0 6px #00E6A0;
+    }
+    .status-error {
+      background: rgba(255, 107, 107, 0.1);
+      color: #FF6B6B;
+      border: 1px solid rgba(255, 107, 107, 0.2);
+    }
+    .status-error::before {
+      background: #FF6B6B;
+      box-shadow: 0 0 6px #FF6B6B;
+    }
+    .status-warning {
+      background: rgba(255, 165, 2, 0.1);
+      color: #FFA502;
+      border: 1px solid rgba(255, 165, 2, 0.2);
+    }
+    .status-warning::before {
+      background: #FFA502;
+      box-shadow: 0 0 6px #FFA502;
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+    }
+    .checkbox-group input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(108, 92, 231, 0.30);
+      border-radius: 4px;
+      background: transparent;
+      cursor: pointer;
+      accent-color: var(--accent-primary);
+      /* 原版只写了未勾选样式，没写 :checked，且背景透明，
+         导致勾选后肉眼看不到任何变化（看起来像"点不动"）。下面补上。 */
+      appearance: none;
+      -webkit-appearance: none;
+      position: relative;
+      flex: 0 0 auto;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    .checkbox-group input[type="checkbox"]:hover {
+      border-color: rgba(108, 92, 231, 0.70);
+    }
+    .checkbox-group input[type="checkbox"]:checked {
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
+    }
+    .checkbox-group input[type="checkbox"]:checked::after {
+      content: "";
+      position: absolute;
+      left: 5px;
+      top: 1px;
+      width: 5px;
+      height: 10px;
+      border: solid #fff;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+    .checkbox-group input[type="checkbox"]:focus-visible {
+      outline: 2px solid var(--accent-primary);
+      outline-offset: 2px;
+    }
+    .checkbox-group label {
+      font-size: 15px;
+      font-weight: 400;
+      cursor: pointer;
+      color: var(--text-primary);
+    }
+
+    .restart-hint {
+      margin-top: 20px;
+      padding: 14px 18px;
+      background: rgba(255, 165, 2, 0.1);
+      border: 1px solid rgba(255, 165, 2, 0.2);
+      border-radius: var(--radius-md);
+      color: var(--semantic-warning);
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--text-tertiary);
+      font-size: 15px;
+    }
+
+    .category-bar {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+      gap: 12px;
+      position: relative;
+      z-index: 100;
+    }
+    .device-count {
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-variant-numeric: tabular-nums;
+    }
+    .cat-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .cat-dropdown-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      font-weight: 500;
+      background: rgba(18, 19, 26, 0.70);
+      border: 1px solid var(--border-default);
+      cursor: pointer;
+      transition: all 0.2s var(--ease-default);
+      user-select: none;
+      color: var(--text-primary);
+    }
+    .cat-dropdown-btn:hover {
+      background: var(--bg-hover);
+      border-color: var(--border-hover);
+    }
+    .cat-dropdown-btn .arrow {
+      font-size: 10px;
+      opacity: 0.6;
+      transition: transform 0.2s;
+    }
+    .cat-dropdown.open .cat-dropdown-btn .arrow { transform: rotate(180deg); }
+    .cat-dropdown-menu {
+      display: none;
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      min-width: 200px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      z-index: 500;
+      padding: 6px 0;
+      max-height: 320px;
+      overflow-y: auto;
+      animation: scaleIn 0.2s var(--ease-spring);
+    }
+    .cat-dropdown.open .cat-dropdown-menu { display: block; }
+    .cat-dropdown-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.1s;
+      color: var(--text-secondary);
+    }
+    .cat-dropdown-item:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+    .cat-dropdown-item.active {
+      color: var(--accent-primary);
+      font-weight: 600;
+      background: rgba(108, 92, 231, 0.08);
+    }
+    .cat-dropdown-item .item-count {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .cat-list { list-style: none; }
+    .cat-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 14px;
+      cursor: grab;
+      transition: all 0.15s;
+    }
+    .cat-item:active { cursor: grabbing; }
+    .cat-item.dragging { opacity: 0.4; background: var(--bg-hover); }
+    .cat-item.drag-over { border-top: 2px solid var(--accent-primary); }
+    .cat-drag-handle {
+      color: var(--text-tertiary);
+      font-size: 16px;
+      flex-shrink: 0;
+      cursor: grab;
+      user-select: none;
+      transition: color 0.2s;
+    }
+    .cat-item:hover .cat-drag-handle { color: var(--text-secondary); }
+    .cat-item:last-child { border-bottom: none; }
+    .cat-name {
+      flex: 1;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    .cat-name-input {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid var(--accent-primary);
+      border-radius: var(--radius-sm);
+      font-size: 15px;
+      font-family: inherit;
+      outline: none;
+      background: rgba(10, 11, 15, 0.80);
+      color: var(--text-primary);
+      box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.15);
+    }
+    .cat-count {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      min-width: 40px;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+    .cat-add-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      padding: 16px 0 0;
+    }
+    .cat-add-row input {
+      flex: 1;
+      padding: 10px 16px;
+      border: 1px solid rgba(108, 92, 231, 0.20);
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      background: rgba(10, 11, 15, 0.80);
+      color: var(--text-primary);
+      transition: all 0.3s var(--ease-default);
+    }
+    .cat-add-row input:focus {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.15);
+    }
+
+    .btn-link {
+      background: none;
+      border: none;
+      color: var(--accent-primary);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .btn-link:hover {
+      color: #7C6DF7;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .ip-cell {
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 13px;
+      color: var(--text-glow);
+    }
+
+    .action-cell {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .stagger-item {
+      opacity: 0;
+      animation: fadeInUp 0.4s cubic-bezier(0, 0, 0.2, 1) forwards;
+    }
+    .stagger-item:nth-child(1) { animation-delay: 0ms; }
+    .stagger-item:nth-child(2) { animation-delay: 60ms; }
+    .stagger-item:nth-child(3) { animation-delay: 120ms; }
+    .stagger-item:nth-child(4) { animation-delay: 180ms; }
+    .stagger-item:nth-child(5) { animation-delay: 240ms; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .main-content { padding: 24px 16px; }
+      .page-header h2 { font-size: 24px; }
+      .header { padding: 0 16px; }
+      .card-header {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+      }
+      .btn-group { width: 100%; flex-wrap: wrap; }
+      table { font-size: 13px; }
+      th, td { padding: 10px 8px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="main-page">
+    <div class="bg-aurora"></div>
+    <div class="bg-grid"></div>
+
+    <div class="header">
+      <div class="header-logo">
+        <div class="header-logo-icon">HA</div>
+        <h1>HA助手</h1>
+      </div>
+      <div class="header-right">
+        <div class="header-status">
+          <div class="header-status-dot"></div>
+          <span>服务运行中</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="layout">
+      <div class="main-content">
+        <div class="page-header">
+          <h2>设备管理</h2>
+          <p>管理允许访问 Home Assistant 仪表板的终端设备，以及PC控制状态</p>
+        </div>
+
+        <div class="category-bar stagger-item" id="category-bar"></div>
+
+        <div class="card stagger-item">
+          <div class="card-header">
+            <h3>设备列表</h3>
+            <div class="btn-group">
+              <button class="btn btn-primary btn-sm" onclick="showAddModal()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                添加设备
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="showRangeModal()">批量添加</button>
+              <button class="btn btn-ghost btn-sm" onclick="showCatModal()">分类管理</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="toolbar" style="display:flex;gap:12px;margin-bottom:20px;align-items:center">
+              <div style="flex:1;position:relative">
+                <input type="text" id="search-input" placeholder="搜索设备名称、IP、MAC..." style="width:100%;padding:10px 16px 10px 40px;border:1px solid rgba(108, 92, 231, 0.20);border-radius:var(--radius-md);font-size:14px;background:rgba(10, 11, 15, 0.80);color:var(--text-primary)">
+                <svg style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-tertiary)" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              </div>
+              <select id="filter-status" style="padding:10px 16px;border:1px solid rgba(108, 92, 231, 0.20);border-radius:var(--radius-md);font-size:14px;background:rgba(10, 11, 15, 0.80);color:var(--text-primary);min-width:120px">
+                <option value="">全部状态</option>
+                <option value="online">在线</option>
+                <option value="offline">离线</option>
+              </select>
+              <select id="sort-field" style="padding:10px 16px;border:1px solid rgba(108, 92, 231, 0.20);border-radius:var(--radius-md);font-size:14px;background:rgba(10, 11, 15, 0.80);color:var(--text-primary);min-width:120px">
+                <option value="name">按名称</option>
+                <option value="ip">按IP</option>
+                <option value="status">按状态</option>
+              </select>
+              <button class="btn btn-ghost btn-sm" id="sort-order-btn" onclick="toggleSortOrder()" title="排序方向">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+              </button>
+            </div>
+            <table>
+              <colgroup>
+                <col style="width:9%">
+                <col style="width:11%">
+                <col style="width:12%">
+                <col style="width:7%">
+                <col style="width:11%">
+                <col style="width:8%">
+                <col style="width:8%">
+                <col style="width:7%">
+                <col style="width:7%">
+                <col style="width:20%">
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>电脑名称</th>
+                  <th>IP地址</th>
+                  <th>MAC地址</th>
+                  <th>分类</th>
+                  <th>HA视图路径</th>
+                  <th>PC状态</th>
+                  <th>客户端</th>
+                  <th>窗口尺寸</th>
+                  <th>最近连接</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="whitelist-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="add-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modal-title">添加设备</h2>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="form-group">
+        <label>电脑名称</label>
+        <input type="text" id="edit-name" placeholder="办公电脑-01">
+      </div>
+      <div class="form-group">
+        <label>IP地址</label>
+        <input type="text" id="edit-ip" placeholder="192.168.1.100">
+      </div>
+      <div class="form-group">
+        <label>MAC地址（用于WOL唤醒）</label>
+        <input type="text" id="edit-mac" placeholder="AA:BB:CC:DD:EE:FF">
+      </div>
+      <div class="form-group">
+        <label>分类</label>
+        <select id="edit-category"></select>
+      </div>
+      <div class="form-group">
+        <label>HA视图路径</label>
+        <input type="text" id="edit-view-path" placeholder="/lovelace/tablet">
+      </div>
+      <div style="display:flex;gap:16px">
+        <div class="form-group" style="flex:1">
+          <label>窗口宽度 (px)</label>
+          <input type="number" id="edit-width" placeholder="0 = 全屏" min="0">
+        </div>
+        <div class="form-group" style="flex:1">
+          <label>窗口高度 (px)</label>
+          <input type="number" id="edit-height" placeholder="0 = 全屏" min="0">
+        </div>
+      </div>
+      <div class="checkbox-group">
+        <input type="checkbox" id="edit-client-enabled" checked>
+        <label for="edit-client-enabled">开启客户端功能（允许终端设备连接）</label>
+      </div>
+      <div class="btn-group" style="justify-content:flex-end;margin-top:28px">
+        <button class="btn btn-ghost" onclick="closeModal()">取消</button>
+        <button class="btn btn-primary" onclick="saveWhitelistItem()">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="cat-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>分类管理</h2>
+        <button class="modal-close" onclick="closeCatModal()">&times;</button>
+      </div>
+      <ul class="cat-list" id="cat-list"></ul>
+      <div class="cat-add-row">
+        <input type="text" id="cat-add-input" placeholder="新分类名称" onkeydown="if(event.key==='Enter')addCatFromInput()">
+        <button class="btn btn-primary btn-sm" onclick="addCatFromInput()">添加</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="range-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>批量添加</h2>
+        <button class="modal-close" onclick="closeRangeModal()">&times;</button>
+      </div>
+      <div style="display:flex;gap:16px;margin-bottom:20px">
+        <button class="btn btn-secondary btn-sm" id="btn-range-mode-ip" onclick="switchRangeMode('ip')">IP段模式</button>
+        <button class="btn btn-ghost btn-sm" id="btn-range-mode-text" onclick="switchRangeMode('text')">文本导入模式</button>
+      </div>
+
+      <!-- IP段模式 -->
+      <div id="range-mode-ip">
+        <div class="form-group">
+          <label>IP前缀</label>
+          <input type="text" id="range-prefix" placeholder="192.168.1">
+        </div>
+        <div style="display:flex;gap:16px">
+          <div class="form-group" style="flex:1">
+            <label>起始</label>
+            <input type="number" id="range-start" placeholder="100" min="1" max="254">
+          </div>
+          <div class="form-group" style="flex:1">
+            <label>结束</label>
+            <input type="number" id="range-end" placeholder="200" min="1" max="254">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>MAC前缀（用于WOL唤醒，可选）</label>
+          <input type="text" id="range-mac-prefix" placeholder="AA:BB:CC:DD:EE">
+        </div>
+      </div>
+
+      <!-- 文本导入模式 -->
+      <div id="range-mode-text" style="display:none">
+        <div class="form-group">
+          <label>全局子网掩码</label>
+          <input type="text" id="range-subnet-mask" placeholder="255.255.255.0">
+        </div>
+        <div class="form-group">
+          <label>粘贴设备列表（格式：电脑名称,IP,MAC）</label>
+          <textarea id="range-batch-text" rows="8" placeholder="办公电脑-01,192.168.1.100,AA:BB:CC:DD:EE:01&#10;办公电脑-02,192.168.1.101,AA:BB:CC:DD:EE:02&#10;会议室电脑,192.168.1.102,AA:BB:CC:DD:EE:03"></textarea>
+        </div>
+        <div class="format-hint">每行一个设备，使用逗号分隔。MAC地址可选，留空则不支持唤醒。</div>
+      </div>
+
+      <div class="form-group">
+        <label>分类</label>
+        <select id="range-category"></select>
+      </div>
+      <div class="form-group">
+        <label>HA视图路径</label>
+        <input type="text" id="range-view-path" placeholder="/lovelace/tablet">
+      </div>
+      <div style="display:flex;gap:16px">
+        <div class="form-group" style="flex:1">
+          <label>窗口宽度 (px)</label>
+          <input type="number" id="range-width" placeholder="0 = 全屏" min="0">
+        </div>
+        <div class="form-group" style="flex:1">
+          <label>窗口高度 (px)</label>
+          <input type="number" id="range-height" placeholder="0 = 全屏" min="0">
+        </div>
+      </div>
+      <div class="format-hint" id="range-preview"></div>
+      <div class="btn-group" style="justify-content:flex-end;margin-top:28px">
+        <button class="btn btn-ghost" onclick="closeRangeModal()">取消</button>
+        <button class="btn btn-primary" onclick="doRangeAdd()">添加</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const INGRESS_PATH = '__INGRESS_PATH__';
+    let whitelist = [];
+    let categories = [];
+    let activeCategory = '';
+    let currentEdit = null;
+    let pcManagerStatus = {};
+    let searchQuery = '';
+    let filterStatus = '';
+    let sortField = 'name';
+    let sortAscending = true;
+
+    async function loadCategories() {
+      const res = await fetch(INGRESS_PATH + '/admin/categories');
+      categories = await res.json();
+      renderCategoryBar();
+      renderCatManage();
+    }
+
+    function renderCatManage() {
+      const list = document.getElementById('cat-list');
+      const counts = {};
+      for (const c of categories) counts[c] = 0;
+      for (const item of whitelist) {
+        const cat = item.category || '';
+        if (counts[cat] !== undefined) counts[cat]++;
+      }
+      list.innerHTML = categories.map((c, i) =>
+        `<li class="cat-item" draggable="true" data-cat="${c}" data-idx="${i}">
+          <span class="cat-drag-handle">⠿</span>
+          <span class="cat-name">${c}</span>
+          <span class="cat-count">${counts[c] || 0} 台</span>
+          <button class="btn btn-secondary btn-sm" onclick="startRenameCat('${c}')">重命名</button>
+          <button class="btn btn-danger btn-sm" onclick="removeCategory('${c}')">删除</button>
+        </li>`
+      ).join('') || '<li style="padding:24px 0;color:var(--text-tertiary);font-size:14px;text-align:center">暂无分类</li>';
+      initCatDrag();
+    }
+
+    function initCatDrag() {
+      const list = document.getElementById('cat-list');
+      if (!list) return;
+      let dragItem = null;
+      list.querySelectorAll('.cat-item').forEach(item => {
+        item.addEventListener('dragstart', e => {
+          dragItem = item;
+          item.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'move';
+        });
+        item.addEventListener('dragend', () => {
+          item.classList.remove('dragging');
+          list.querySelectorAll('.cat-item').forEach(i => i.classList.remove('drag-over'));
+          dragItem = null;
+        });
+        item.addEventListener('dragover', e => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+          if (item !== dragItem) {
+            list.querySelectorAll('.cat-item').forEach(i => i.classList.remove('drag-over'));
+            item.classList.add('drag-over');
+          }
+        });
+        item.addEventListener('dragleave', () => {
+          item.classList.remove('drag-over');
+        });
+        item.addEventListener('drop', async e => {
+          e.preventDefault();
+          item.classList.remove('drag-over');
+          if (!dragItem || dragItem === item) return;
+          const fromName = dragItem.dataset.cat;
+          const toName = item.dataset.cat;
+          const fromIdx = categories.indexOf(fromName);
+          const toIdx = categories.indexOf(toName);
+          if (fromIdx === -1 || toIdx === -1) return;
+          categories.splice(fromIdx, 1);
+          categories.splice(toIdx, 0, fromName);
+          await fetch(INGRESS_PATH + '/admin/categories/reorder', {
+            method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ order: categories })
+          });
+          renderCatManage();
+          renderCategoryBar();
+        });
+      });
+    }
+
+    async function addCatFromInput() {
+      const input = document.getElementById('cat-add-input');
+      const name = input.value.trim();
+      if (!name) return;
+      const res = await fetch(INGRESS_PATH + '/admin/categories', {
+        method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ name })
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        alert(err.error || '添加失败');
+        return;
+      }
+      input.value = '';
+      await loadCategories();
+    }
+
+    function startRenameCat(oldName) {
+      const li = document.querySelector(`.cat-item[data-cat="${oldName}"]`);
+      if (!li) return;
+      const nameSpan = li.querySelector('.cat-name');
+      const countSpan = li.querySelector('.cat-count');
+      const btns = li.querySelectorAll('.btn');
+      nameSpan.outerHTML = `<input class="cat-name-input" value="${oldName}" onkeydown="if(event.key==='Enter')saveRenameCat('${oldName}',this);if(event.key==='Escape')renderCatManage()">`;
+      btns[0].outerHTML = `<button class="btn btn-primary btn-sm" onclick="saveRenameCat('${oldName}',this.previousElementSibling)">保存</button>`;
+      btns[1].outerHTML = `<button class="btn btn-ghost btn-sm" onclick="renderCatManage()">取消</button>`;
+      li.querySelector('.cat-name-input').focus();
+    }
+
+    async function saveRenameCat(oldName, inputEl) {
+      const newName = inputEl.value.trim();
+      if (!newName || newName === oldName) { renderCatManage(); return; }
+      const res = await fetch(INGRESS_PATH + '/admin/categories', {
+        method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ oldName, newName })
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        alert(err.error || '重命名失败');
+        return;
+      }
+      if (activeCategory === oldName) activeCategory = newName;
+      await loadWhitelist();
+    }
+
+    function renderCategoryBar() {
+      const bar = document.getElementById('category-bar');
+      const counts = {};
+      counts[''] = whitelist.length;
+      for (const c of categories) counts[c] = 0;
+      for (const item of whitelist) {
+        const cat = item.category || '';
+        if (counts[cat] !== undefined) counts[cat]++;
+        else counts[cat] = 1;
+      }
+      const activeName = activeCategory === '' ? '全部' : activeCategory;
+      const activeCount = activeCategory === '' ? whitelist.length : (counts[activeCategory] || 0);
+      let menuItems = `<div class="cat-dropdown-item ${activeCategory === '' ? 'active' : ''}" onclick="selectCategory('')">全部<span class="item-count">${counts['']}</span></div>`;
+      for (const c of categories) {
+        menuItems += `<div class="cat-dropdown-item ${activeCategory === c ? 'active' : ''}" onclick="selectCategory('${c}')">${c}<span class="item-count">${counts[c] || 0}</span></div>`;
+      }
+      bar.innerHTML = `<div class="cat-dropdown" id="cat-dropdown">
+        <div class="cat-dropdown-btn" onclick="toggleCatDropdown(event)">
+          <span>${activeName}</span>
+          <span class="arrow">▼</span>
+        </div>
+        <div class="cat-dropdown-menu">${menuItems}</div>
+      </div>
+      <span class="device-count">${activeCount} 台设备</span>`;
+    }
+
+    function toggleCatDropdown(e) {
+      e.stopPropagation();
+      const dd = document.getElementById('cat-dropdown');
+      dd.classList.toggle('open');
+    }
+
+    function selectCategory(name) {
+      activeCategory = name;
+      document.getElementById('cat-dropdown').classList.remove('open');
+      renderCategoryBar();
+      renderWhitelist();
+    }
+
+    document.addEventListener('click', () => {
+      const dd = document.getElementById('cat-dropdown');
+      if (dd) dd.classList.remove('open');
+    });
+
+    async function removeCategory(name) {
+      if (!confirm(`删除分类「${name}」？该分类下的设备将变为未分类。`)) return;
+      await fetch(INGRESS_PATH + '/admin/categories/' + encodeURIComponent(name), { method: 'DELETE' });
+      if (activeCategory === name) activeCategory = '';
+      await loadCategories();
+      renderWhitelist();
+    }
+
+    function populateCategorySelect(selected) {
+      const sel = document.getElementById('edit-category');
+      sel.innerHTML = '<option value="">未分类</option>' +
+        categories.map(c => `<option value="${c}" ${c === selected ? 'selected' : ''}>${c}</option>`).join('');
+    }
+
+    async function loadWhitelist() {
+      const res = await fetch(INGRESS_PATH + '/admin/whitelist');
+      whitelist = await res.json();
+      await loadCategories();
+      await loadPCManagerStatus();
+      renderWhitelist();
+    }
+
+    async function loadPCManagerStatus() {
+      try {
+        const res = await fetch(INGRESS_PATH + '/admin/pc-manager/status');
+        if (res.ok) {
+          const data = await res.json();
+          pcManagerStatus = data.devices || {};
+        }
+      } catch (error) {
+        console.error('获取PC管理状态失败:', error);
+        pcManagerStatus = {};
+      }
+    }
+
+    async function wakeDevice(ip) {
+      if (!confirm(`确定要唤醒 ${ip} 吗？`)) return;
+
+      try {
+        const res = await fetch(INGRESS_PATH + `/admin/pc-manager/wake/${ip}`, {
+          method: 'POST'
+        });
+        const result = await res.json();
+        if (result.success) {
+          alert(`唤醒信号已发送到 ${ip}`);
+          // 刷新状态
+          await loadPCManagerStatus();
+          renderWhitelist();
+        } else {
+          alert(`唤醒失败: ${result.error}`);
+        }
+      } catch (error) {
+        alert(`唤醒失败: ${error.message}`);
+      }
+    }
+
+    function getFilteredAndSortedDevices() {
+      let devices = activeCategory === '' ? whitelist : whitelist.filter(i => (i.category || '') === activeCategory);
+
+      // 搜索过滤
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        devices = devices.filter(item => {
+          const name = (item.name || '').toLowerCase();
+          const ip = (item.ip || '').toLowerCase();
+          const mac = (item.mac || '').toLowerCase();
+          return name.includes(query) || ip.includes(query) || mac.includes(query);
+        });
+      }
+
+      // 状态过滤
+      if (filterStatus) {
+        devices = devices.filter(item => {
+          const pcStatus = pcManagerStatus[item.ip] || {};
+          const isOnline = pcStatus.is_online || false;
+          return filterStatus === 'online' ? isOnline : !isOnline;
+        });
+      }
+
+      // 排序
+      devices.sort((a, b) => {
+        let comparison = 0;
+        switch (sortField) {
+          case 'name':
+            comparison = (a.name || a.ip || '').localeCompare(b.name || b.ip || '');
+            break;
+          case 'ip':
+            // 按IP数字排序
+            const ipA = a.ip.split('.').map(Number);
+            const ipB = b.ip.split('.').map(Number);
+            for (let i = 0; i < 4; i++) {
+              comparison = ipA[i] - ipB[i];
+              if (comparison !== 0) break;
+            }
+            break;
+          case 'status':
+            const statusA = pcManagerStatus[a.ip]?.is_online ? 1 : 0;
+            const statusB = pcManagerStatus[b.ip]?.is_online ? 1 : 0;
+            comparison = statusA - statusB;
+            break;
+        }
+        return sortAscending ? comparison : -comparison;
+      });
+
+      return devices;
+    }
+
+    function renderWhitelist() {
+      const tbody = document.getElementById('whitelist-body');
+      const filtered = getFilteredAndSortedDevices();
+      tbody.innerHTML = filtered.map(item => {
+        const sizeDisplay = (item.width && item.height) ? `${item.width}x${item.height}` : '全屏';
+        const lastPull = item.lastPull ? new Date(item.lastPull).toLocaleString('zh-CN') : '从未连接';
+        const previewURL = buildPreviewURL(item);
+        const cat = item.category || '-';
+        const mac = item.mac || '-';
+        const name = item.name || item.ip;
+        const clientEnabled = item.client_enabled !== false;
+
+        // 获取PC状态
+        const pcStatus = pcManagerStatus[item.ip] || {};
+        const isOnline = pcStatus.is_online || false;
+        const pcStatusClass = isOnline ? 'status-success' : 'status-error';
+        const pcStatusText = isOnline ? '在线' : '离线';
+
+        const clientStatusClass = clientEnabled ? 'status-success' : 'status-warning';
+        const clientStatusText = clientEnabled ? '已开启' : '已关闭';
+
+        return `<tr>
+          <td style="font-weight:500;color:var(--text-primary)">${name}</td>
+          <td><span class="ip-cell">${item.ip}</span></td>
+          <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-secondary)">${mac}</td>
+          <td><span class="status-badge ${cat !== '-' ? 'status-success' : 'status-warning'}">${cat}</span></td>
+          <td style="color:var(--text-secondary);font-size:13px">${item.view_path || '-'}</td>
+          <td><span class="status-badge ${pcStatusClass}">${pcStatusText}</span></td>
+          <td><span class="status-badge ${clientStatusClass}">${clientStatusText}</span></td>
+          <td style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text-secondary)">${sizeDisplay}</td>
+          <td style="color:var(--text-secondary);font-size:13px">${lastPull}</td>
+          <td>
+            <div class="action-cell">
+              <a href="${previewURL}" target="_blank" class="preview-link">预览</a>
+              <button class="btn btn-ghost btn-sm" onclick="copyItem('${item.ip}')">复制</button>
+              <button class="btn btn-secondary btn-sm" onclick="editItem('${item.ip}')">编辑</button>
+              ${!isOnline && item.mac ? `<button class="btn btn-primary btn-sm" onclick="wakeDevice('${item.ip}')">唤醒</button>` : ''}
+              <button class="btn btn-danger btn-sm" onclick="deleteItem('${item.ip}')">删除</button>
+            </div>
+          </td>
+        </tr>`;
+      }).join('') || '<tr><td colspan="10" class="empty-state">暂无设备，点击「添加设备」开始</td></tr>';
+      renderCategoryBar();
+    }
+
+    function toggleSortOrder() {
+      sortAscending = !sortAscending;
+      const btn = document.getElementById('sort-order-btn');
+      btn.innerHTML = sortAscending
+        ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>'
+        : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+      renderWhitelist();
+    }
+
+    // 初始化搜索和筛选事件
+    document.getElementById('search-input').addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      renderWhitelist();
+    });
+
+    document.getElementById('filter-status').addEventListener('change', (e) => {
+      filterStatus = e.target.value;
+      renderWhitelist();
+    });
+
+    document.getElementById('sort-field').addEventListener('change', (e) => {
+      sortField = e.target.value;
+      renderWhitelist();
+    });
+
+    function buildPreviewURL(item) {
+      const baseURL = document.getElementById('ha-base-url')?.value || '';
+      const viewPath = item.view_path || '';
+      return `${baseURL}${viewPath}?kiosk=true`;
+    }
+
+    function showAddModal() {
+      currentEdit = null;
+      document.getElementById('modal-title').textContent = '添加设备';
+      document.getElementById('edit-name').value = '';
+      document.getElementById('edit-ip').value = '';
+      document.getElementById('edit-ip').disabled = false;
+      document.getElementById('edit-mac').value = '';
+      populateCategorySelect(activeCategory);
+      document.getElementById('edit-view-path').value = '';
+      document.getElementById('edit-width').value = '';
+      document.getElementById('edit-height').value = '';
+      document.getElementById('edit-client-enabled').checked = true;
+      document.getElementById('add-modal').classList.add('active');
+    }
+
+    function editItem(ip) {
+      const item = whitelist.find(i => i.ip === ip);
+      if (!item) return;
+      currentEdit = ip;
+      document.getElementById('modal-title').textContent = '编辑设备';
+      document.getElementById('edit-name').value = item.name || '';
+      document.getElementById('edit-ip').value = item.ip;
+      document.getElementById('edit-ip').disabled = true;
+      document.getElementById('edit-mac').value = item.mac || '';
+      populateCategorySelect(item.category || '');
+      document.getElementById('edit-view-path').value = item.view_path || '';
+      document.getElementById('edit-width').value = item.width || '';
+      document.getElementById('edit-height').value = item.height || '';
+      document.getElementById('edit-client-enabled').checked = item.client_enabled !== false;
+      document.getElementById('add-modal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('add-modal').classList.remove('active');
+    }
+
+    async function saveWhitelistItem() {
+      const data = {
+        name: document.getElementById('edit-name').value.trim(),
+        ip: document.getElementById('edit-ip').value.trim(),
+        mac: document.getElementById('edit-mac').value.trim(),
+        category: document.getElementById('edit-category').value,
+        view_path: document.getElementById('edit-view-path').value.trim(),
+        width: parseInt(document.getElementById('edit-width').value) || 0,
+        height: parseInt(document.getElementById('edit-height').value) || 0,
+        client_enabled: document.getElementById('edit-client-enabled').checked
+      };
+      if (!data.ip) { alert('IP地址必填'); return; }
+
+      if (currentEdit) {
+        await fetch(INGRESS_PATH + '/admin/whitelist/' + encodeURIComponent(currentEdit), {
+          method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data)
+        });
+      } else {
+        await fetch(INGRESS_PATH + '/admin/whitelist', {
+          method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data)
+        });
+      }
+      closeModal();
+      loadWhitelist();
+    }
+
+    async function deleteItem(ip) {
+      if (!confirm('确定删除 ' + ip + '？')) return;
+      await fetch(INGRESS_PATH + '/admin/whitelist/' + encodeURIComponent(ip), { method: 'DELETE' });
+      await loadWhitelist();
+    }
+
+    function copyItem(ip) {
+      const item = whitelist.find(i => i.ip === ip);
+      if (!item) return;
+      currentEdit = null;
+      document.getElementById('modal-title').textContent = '复制设备';
+      document.getElementById('edit-name').value = item.name || '';
+      document.getElementById('edit-ip').value = '';
+      document.getElementById('edit-ip').disabled = false;
+      document.getElementById('edit-ip').focus();
+      document.getElementById('edit-mac').value = item.mac || '';
+      populateCategorySelect(item.category || '');
+      document.getElementById('edit-view-path').value = item.view_path || '';
+      document.getElementById('edit-width').value = item.width || '';
+      document.getElementById('edit-height').value = item.height || '';
+      document.getElementById('add-modal').classList.add('active');
+    }
+
+    let currentRangeMode = 'ip';
+
+    function switchRangeMode(mode) {
+      currentRangeMode = mode;
+      document.getElementById('range-mode-ip').style.display = mode === 'ip' ? 'block' : 'none';
+      document.getElementById('range-mode-text').style.display = mode === 'text' ? 'block' : 'none';
+      document.getElementById('btn-range-mode-ip').className = mode === 'ip' ? 'btn btn-secondary btn-sm' : 'btn btn-ghost btn-sm';
+      document.getElementById('btn-range-mode-text').className = mode === 'text' ? 'btn btn-secondary btn-sm' : 'btn btn-ghost btn-sm';
+      updateRangePreview();
+    }
+
+    function showRangeModal() {
+      currentRangeMode = 'ip';
+      document.getElementById('range-mode-ip').style.display = 'block';
+      document.getElementById('range-mode-text').style.display = 'none';
+      document.getElementById('btn-range-mode-ip').className = 'btn btn-secondary btn-sm';
+      document.getElementById('btn-range-mode-text').className = 'btn btn-ghost btn-sm';
+
+      document.getElementById('range-prefix').value = '';
+      document.getElementById('range-start').value = '';
+      document.getElementById('range-end').value = '';
+      document.getElementById('range-mac-prefix').value = '';
+      document.getElementById('range-subnet-mask').value = '255.255.255.0';
+      document.getElementById('range-batch-text').value = '';
+      document.getElementById('range-view-path').value = '';
+      document.getElementById('range-width').value = '';
+      document.getElementById('range-height').value = '';
+      document.getElementById('range-preview').textContent = '';
+      const sel = document.getElementById('range-category');
+      sel.innerHTML = '<option value="">未分类</option>' +
+        categories.map(c => `<option value="${c}">${c}</option>`).join('');
+      document.getElementById('range-modal').classList.add('active');
+      document.getElementById('range-prefix').addEventListener('input', updateRangePreview);
+      document.getElementById('range-start').addEventListener('input', updateRangePreview);
+      document.getElementById('range-end').addEventListener('input', updateRangePreview);
+      document.getElementById('range-batch-text').addEventListener('input', updateRangePreview);
+    }
+
+    function closeRangeModal() {
+      document.getElementById('range-modal').classList.remove('active');
+    }
+
+    function updateRangePreview() {
+      const el = document.getElementById('range-preview');
+      if (currentRangeMode === 'ip') {
+        const prefix = document.getElementById('range-prefix').value.trim();
+        const start = parseInt(document.getElementById('range-start').value);
+        const end = parseInt(document.getElementById('range-end').value);
+        if (!prefix || isNaN(start) || isNaN(end) || start < 1 || end < start || end > 254) {
+          el.textContent = '';
+          return;
+        }
+        const count = end - start + 1;
+        el.textContent = `将添加 ${count} 个设备: ${prefix}.${start} ~ ${prefix}.${end}`;
+      } else {
+        const text = document.getElementById('range-batch-text').value.trim();
+        if (!text) {
+          el.textContent = '';
+          return;
+        }
+        const lines = text.split('\n').filter(line => line.trim());
+        el.textContent = `将添加 ${lines.length} 个设备`;
+      }
+    }
+
+    function parseBatchText(text) {
+      const items = [];
+      const lines = text.split('\n').filter(line => line.trim());
+      for (const line of lines) {
+        const parts = line.split(',').map(p => p.trim());
+        if (parts.length < 2) continue;
+        const name = parts[0] || '';
+        const ip = parts[1] || '';
+        const mac = parts[2] || '';
+        if (ip) {
+          items.push({ name, ip, mac });
+        }
+      }
+      return items;
+    }
+
+    async function doRangeAdd() {
+      const category = document.getElementById('range-category').value;
+      const viewPath = document.getElementById('range-view-path').value.trim();
+      const width = parseInt(document.getElementById('range-width').value) || 0;
+      const height = parseInt(document.getElementById('range-height').value) || 0;
+      let items = [];
+
+      if (currentRangeMode === 'ip') {
+        const prefix = document.getElementById('range-prefix').value.trim();
+        const start = parseInt(document.getElementById('range-start').value);
+        const end = parseInt(document.getElementById('range-end').value);
+        if (!prefix) { alert('IP前缀必填'); return; }
+        if (isNaN(start) || isNaN(end) || start < 1 || end > 254 || start > end) {
+          alert('起止范围无效 (1-254, 起始<=结束)'); return;
+        }
+        const macPrefix = document.getElementById('range-mac-prefix').value.trim();
+        for (let i = start; i <= end; i++) {
+          const item = { name: `${prefix}-${i}`, ip: `${prefix}.${i}`, category, view_path: viewPath, width, height };
+          if (macPrefix) {
+            const macSuffix = i.toString(16).padStart(2, '0').toUpperCase();
+            item.mac = `${macPrefix}:${macSuffix}`;
+          }
+          items.push(item);
+        }
+      } else {
+        const text = document.getElementById('range-batch-text').value.trim();
+        if (!text) { alert('请粘贴设备列表'); return; }
+        const parsed = parseBatchText(text);
+        items = parsed.map(p => ({
+          name: p.name,
+          ip: p.ip,
+          mac: p.mac,
+          category,
+          view_path: viewPath,
+          width,
+          height
+        }));
+      }
+
+      if (items.length === 0) {
+        alert('没有有效的设备数据');
+        return;
+      }
+
+      const res = await fetch(INGRESS_PATH + '/admin/whitelist/batch', {
+        method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ items })
+      });
+      const result = await res.json();
+      alert(`添加完成: 新增 ${result.imported} 条, 更新 ${result.updated} 条`);
+      closeRangeModal();
+      loadWhitelist();
+    }
+
+    function showCatModal() {
+      renderCatManage();
+      document.getElementById('cat-modal').classList.add('active');
+    }
+
+    function closeCatModal() {
+      document.getElementById('cat-modal').classList.remove('active');
+    }
+
+    loadWhitelist();
+
+    // 每30秒自动刷新PC状态
+    setInterval(async () => {
+      await loadPCManagerStatus();
+      renderWhitelist();
+    }, 30000);
+  </script>
+</body>
+</html>

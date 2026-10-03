@@ -1,0 +1,120 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "智咖系统",
+        "description": "从智咖系统 Add-on 同步设备列表。\n\n请确认 Add-on 已启动并正常运行。",
+        "data": {},
+        "data_description": {}
+      },
+      "devices": {
+        "title": "选择要导入的电脑",
+        "description": "服务端共有 {count} 台可导入的电脑。勾选后提交即可。\n\nMAC 地址为空的电脑无法远程唤醒。",
+        "data": {
+          "devices": "要导入的电脑"
+        },
+        "data_description": {}
+      },
+      "single": {
+        "title": "添加单台电脑",
+        "description": "填写电脑信息。MAC 地址将作为唯一标识。",
+        "data": {
+          "name": "名称",
+          "host_ip": "IP 地址",
+          "mac": "MAC 地址",
+          "subnet_mask": "子网掩码"
+        },
+        "data_description": {
+          "host_ip": "电脑的局域网 IP 地址",
+          "mac": "格式示例：{mac_format}",
+          "subnet_mask": "格式：255.255.240.0，自动转换为 /20"
+        }
+      },
+      "batch": {
+        "title": "批量导入电脑",
+        "description": "每行一台设备，格式：{format}\n\n示例：\n{example}\n\n支持逗号、分号、制表符、空格分隔。以 # 或 // 开头的行为注释。",
+        "data": {
+          "subnet_mask": "子网掩码",
+          "batch_text": "设备列表"
+        },
+        "data_description": {
+          "subnet_mask": "格式：255.255.240.0，应用到本批次所有设备"
+        }
+      },
+      "reconfigure": {
+        "title": "重新配置 {name}",
+        "description": "修改设备名称、IP、MAC 或子网掩码。\n\n⚠️ 修改 MAC 地址将导致历史记录断开，但实体 ID 保持不变。",
+        "data": {
+          "name": "名称",
+          "host_ip": "IP 地址",
+          "mac": "MAC 地址",
+          "subnet_mask": "子网掩码"
+        },
+        "data_description": {
+          "subnet_mask": "格式：255.255.240.0，自动转换为 /20"
+        }
+      },
+      "reconfigure_confirm": {
+        "title": "确认 MAC 地址变更",
+        "description": "⚠️ **MAC 地址变更警告**\n\n您即将将 MAC 地址从 `{old_mac}` 修改为 `{new_mac}`。\n\n**请注意：**\n- 该设备的历史记录将断开\n- 实体 ID 保持不变\n- 此操作不可撤销\n\n是否确认继续？",
+        "data": {
+          "confirm": "确认变更"
+        }
+      }
+    },
+    "error": {
+      "unknown": "智咖系统集成内部出错，请在「设置 → 系统 → 日志」中搜索 smartcafe_control 查看具体原因",
+      "no_sensor_found": "未找到设备传感器 {entity_id}，请确认智咖系统 Add-on 已启动",
+      "no_devices_found": "设备列表为空，请先在智咖系统中添加设备",
+      "no_devices_selected": "请至少选择一台设备",
+      "invalid_ip": "无效的 IP 地址格式",
+      "invalid_mac": "无效的 MAC 地址格式（应为 AA:BB:CC:DD:EE:FF）",
+      "mac_already_configured": "该 MAC 地址已被其他设备使用",
+      "invalid_subnet_mask": "无效的子网掩码格式，请输入如 255.255.240.0"
+    },
+    "abort": {
+      "already_configured_device": "该设备已配置",
+      "all_devices_configured": "服务端里的设备都已经导入过了，没有新的设备可添加",
+      "no_devices_found": "服务端没有找到设备，请先在智咖系统中添加设备",
+      "import_success": "设备导入成功",
+      "batch_import_success": "批量导入完成：成功 {success} 台，失败 {failed} 台",
+      "batch_import_failed": "批量导入失败：成功 {success} 台，失败 {failed} 台。请检查格式。",
+      "import_failed": "导入失败：数据格式错误",
+      "reconfigure_success": "设备配置已更新",
+      "reconfigure_failed": "重新配置失败：找不到设备"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "PC Manager 设置",
+        "description": "调整当前设备的扫描参数。"
+      },
+      "device_settings": {
+        "title": "设备参数调整 - {name}",
+        "description": "覆盖此设备的扫描参数。如不修改，将使用全局设置。",
+        "data": {
+          "scan_interval": "扫描间隔（秒）",
+          "ping_count": "Ping 次数"
+        },
+        "data_description": {
+          "scan_interval": "此设备专用的扫描间隔（5-3600 秒）",
+          "ping_count": "此设备专用的 Ping 次数（1-10 次）"
+        }
+      }
+    },
+    "error": {}
+  },
+  "entity": {
+    "switch": {
+      "pc_power": {
+        "name": "电源"
+      }
+    },
+    "binary_sensor": {
+      "pc_online": {
+        "name": "在线状态"
+      }
+    }
+  }
+}
