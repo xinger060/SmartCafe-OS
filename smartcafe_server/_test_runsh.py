@@ -49,9 +49,12 @@ def run_case(name, initial, env_token, expect):
 
     env = dict(os.environ)
     env.update({
-        "HA_BASE_URL": "http://192.168.110.33",
-        "HA_USERNAME": "admin",
-        "HA_PASSWORD": "bzd12345",
+        # ⚠️ 这里是【假值】。这个文件会跟着 smartcafe_server/ 一起进公开仓库，
+        #    绝对不能写真实的 HA 地址/账号/密码/令牌。
+        #    （踩过：曾经把真实的 HA 密码写在这里，结果泄露到公开仓库。）
+        "HA_BASE_URL": "http://192.168.1.100",
+        "HA_USERNAME": "testuser",
+        "HA_PASSWORD": "test-password-not-real",
         "HA_TOKEN_REFRESH_TIME": "",
         "HA_LONG_LIVED_TOKEN": env_token,
     })
@@ -87,7 +90,7 @@ allok &= run_case(
     "",
     {"ha_long_lived_token": TOKEN_OLD, "port": 8766,
      "password_hash": "abc", "password_salt": "def",
-     "ha_base_url": "http://192.168.110.33"},
+     "ha_base_url": "http://192.168.1.100"},
 )
 
 allok &= run_case(
@@ -102,7 +105,7 @@ allok &= run_case(
     None,
     TOKEN_NEW,
     {"ha_long_lived_token": TOKEN_NEW, "port": 8766,
-     "ha_base_url": "http://192.168.110.33", "ha_username": "admin",
+     "ha_base_url": "http://192.168.1.100", "ha_username": "testuser",
      "token_refresh_time": "", "password_hash": "", "password_salt": ""},
 )
 
